@@ -1,48 +1,61 @@
-# Importation des modules nécessaires
 import requests
 from bs4 import BeautifulSoup
 import csv
-
-# URL de la page à scraper
-url = "http://books.toscrape.com/index.html"
-
-# Envoi d'une requête HTTP à l'URL spécifiée et analyse du contenu HTML avec BeautifulSoup
-page = requests.get(url)
-soup = BeautifulSoup(page.content, "html.parser")
+import os
 
 
-# Définition de la fonction pour extraire les informations d'une page de livre spécifique
-def scrape_book_page(url):
-    # Envoi d'une requête HTTP à l'URL spécifiée et analyse du contenu HTML avec BeautifulSoup
+# Fonction pour récupérer les URLs des livres d'une catégorie
+def get_books_urls(category_url):
+    books_urls = []
+    next_page_url = category_url
+
+    while next_page_url:
+        page = requests.get(next_page_url)
+        soup = BeautifulSoup(page.content, "html.parser")
+
+        # Récupérer les liens des livres sur la page actuelle
+        books = soup.find_all("h3")
+        for book in books:
+            books_urls.append(
+                "http://books.toscrape.com/catalogue/"
+                + book.find("a")["href"].replace("../", "")
+            )
+
+        # Trouver le lien de la page suivante s'il existe
+        next_page = soup.find("li", class_="next")
+        if next_page:
+            next_page_url = (
+                category_url.replace("index.html", "") + next_page.find("a")["href"]
+            )
+        else:
+            next_page_url = None
+
+    return books_urls
+
+
+# Fonction pour extraire les informations d'un livre à partir de son URL
+def get_book_info(url, category):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
-
-    # Extraction des informations spécifiques de la page de livre
     title = soup.find("h1").text
     price = soup.find("p", class_="price_color").text
-    stock = soup.find("p", class_="instock availability").text.strip()
-
-    # Extraction de la description (avec vérification si l'élément existe)
-    description_element = soup.find("div", id="product_description")
-    description = (
-        description_element.next_sibling.next_sibling.text.strip()
-        if description_element
-        else ""
+    stock_text = soup.find("p", class_="instock availability").text.strip()
+    # Extrait uniquement la partie numérique de la chaîne de stock
+    stock = int("".join(filter(str.isdigit, stock_text)))
+    description = soup.find("div", id="product_description")
+    if description:
+        description = description.find_next_sibling("p").text
+    upc = soup.find("td").text
+    rating = (
+        soup.find("p", class_="star-rating")["class"][1]
+        .replace("One", "1")
+        .replace("Two", "2")
+        .replace("Three", "3")
+        .replace("Four", "4")
+        .replace("Five", "5")
     )
-
-    category = soup.find("ul", class_="breadcrumb").find_all("a")[2].text
-    rating = soup.find("p", class_="star-rating")["class"][1]
-    image_url = soup.find("div", class_="item active").find("img")["src"]
-    table = soup.find("table", class_="table table-striped")
-    rows = table.find_all("tr")
-    upc = rows[0].find("td").text
-    product_type = rows[1].find("td").text
-    price_excluding_tax = rows[2].find("td").text
-    price_including_tax = rows[3].find("td").text
-    tax = rows[4].find("td").text
-    availability = rows[5].find("td").text
-
-    # Retourne les informations extraites sous forme de dictionnaire
+    rating = int(rating)
+    image = soup.find("img")["src"].replace("../../", "http://books.toscrape.com/")
     return {
         "product_page_url": url,
         "universal_product_code": upc,
@@ -53,22 +66,58 @@ def scrape_book_page(url):
         "product_description": description,
         "category": category,
         "review_rating": rating,
-        "image_url": image_url,
+        "image_url": image,
     }
 
 
-# URL d'une page de livre spécifique à scraper
-url = "http://books.toscrape.com/catalogue/the-picture-of-dorian-gray_270/index.html"
+# URL de la page principale
+url = "http://books.toscrape.com/index.html"
+page = requests.get(url)
+soup = BeautifulSoup(page.content, "html.parser")
 
-# Appel de la fonction scrape_book_page avec l'URL spécifique pour extraire les informations
-scraped_data = scrape_book_page(url)
+# Recherche des URLs des catégories
+categories = soup.find("ul", class_="nav nav-list").find_all("li")
+categories_urls = []
+for category in categories:
+    categories_urls.append("http://books.toscrape.com/" + category.find("a")["href"])
 
-# Écriture des données extraites dans un fichier CSV lisible et clair
-with open("books.csv", "w", encoding="utf-8-sig", newline="") as f:
-    writer = csv.DictWriter(f, fieldnames=scraped_data.keys())
+# Parcours de chaque catégorie
+for category_url in categories_urls:
+    page = requests.get(category_url)
+    soup = BeautifulSoup(page.content, "html.parser")
+    category_name = soup.find("li", class_="active").text.strip()
+    books_urls = get_books_urls(category_url)
+    print(category_name)
 
-    # Écriture de l'en-tête du fichier CSV
-    writer.writeheader()
+    # Création d'un dossier pour la catégorie
+    category_folder = "categories/" + category_name
+    if not os.path.exists(category_folder):
+        os.makedirs(category_folder)
 
-    # Écriture des données dans le fichier CSV
-    writer.writerow(scraped_data)
+    # Ouverture du fichier CSV pour écrire les informations des livres
+    with open(
+        category_folder + "/books.csv",
+        "w",
+        encoding="utf-8-sig",
+        newline="",
+    ) as csvfile:
+        fieldnames = [
+            "product_page_url",
+            "universal_product_code",
+            "title",
+            "price_including_tax",
+            "price_excluding_tax",
+            "number_available",
+            "product_description",
+            "category",
+            "review_rating",
+            "image_url",
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        # Écriture des informations de chaque livre dans le fichier CSV
+        for book_url in books_urls:
+            print(book_url)
+            book_info = get_book_info(book_url, category_name)
+            writer.writerow(book_info)

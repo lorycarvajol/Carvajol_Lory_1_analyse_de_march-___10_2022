@@ -10,6 +10,10 @@ soup = BeautifulSoup(page.content, "html.parser")
 
 
 # Fonction pour récupérer les URLs des livres d'une catégorie
+import requests
+from bs4 import BeautifulSoup
+
+
 def get_books_urls(category_url):
     page = requests.get(category_url)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -20,6 +24,15 @@ def get_books_urls(category_url):
             "http://books.toscrape.com/catalogue/"
             + book.find("a")["href"].replace("../", "")
         )
+
+    # Trouver le lien vers la page suivante s'il existe
+    next_page = soup.find("li", class_="next")
+    if next_page:
+        next_page_link = next_page.find("a")["href"]
+        next_page_url = category_url.replace("index.html", "") + next_page_link
+        # Ajout des URLs des livres de la page suivante
+        books_urls += get_books_urls(next_page_url)
+
     return books_urls
 
 
@@ -106,3 +119,30 @@ for category_url in categories_urls:
             print(book_url)
             book_info = get_book_info(book_url)
             writer.writerow(book_info)
+
+
+def get_book_images_urls():
+    book_images_urls = []
+    for page_number in range(1, 51):
+        page_url = (
+            "http://books.toscrape.com/catalogue/page-" + str(page_number) + ".html"
+        )
+        page = requests.get(page_url)
+        soup = BeautifulSoup(page.content, "html.parser")
+        book_images = soup.find_all("img")
+        for book_image in book_images:
+            book_images_urls.append(book_image["src"])
+    return book_images_urls
+
+
+def download_book_images():
+    book_images_urls = get_book_images_urls()
+    if not os.path.exists("images"):
+        os.makedirs("images")
+    for book_image_url in book_images_urls:
+        book_image = requests.get("http://books.toscrape.com/" + book_image_url)
+        with open("images/" + book_image_url.split("/")[-1], "wb") as f:
+            f.write(book_image.content)
+
+
+download_book_images()
