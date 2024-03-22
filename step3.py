@@ -8,12 +8,6 @@ url = "http://books.toscrape.com/index.html"
 page = requests.get(url)
 soup = BeautifulSoup(page.content, "html.parser")
 
-# Recherche des URLs des catégories
-categories = soup.find("ul", class_="nav nav-list").find_all("li")
-categories_urls = []
-for category in categories:
-    categories_urls.append("http://books.toscrape.com/" + category.find("a")["href"])
-
 
 # Fonction pour récupérer les URLs des livres d'une catégorie
 def get_books_urls(category_url):
@@ -66,6 +60,12 @@ def get_book_info(url):
         "image_url": image,
     }
 
+
+# Recherche des URLs des catégories
+categories = soup.find("ul", class_="nav nav-list").find_all("li")
+categories_urls = []
+for category in categories:
+    categories_urls.append("http://books.toscrape.com/" + category.find("a")["href"])
 
 # Parcours de chaque catégorie
 for category_url in categories_urls:
