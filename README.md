@@ -9,11 +9,7 @@ Le script principal (`main.py`) parcourt différentes catégories de livres sur 
 ## Installation
 
 1. Clonez ce dépôt vers votre machine locale :
-
-
 2. Assurez-vous d'avoir Python 3 installé sur votre machine.
-
-
 3. Installez les dépendances en exécutant la commande suivante dans votre terminal :
 
 pip install -r requirements.txt
@@ -24,19 +20,13 @@ pip install -r requirements.txt
 
 python main.py
 
-
 2. Les données seront extraites et stockées dans des fichiers CSV dans le répertoire `categories`.
 
 ## Structure du Projet
 
 - `main.py` : le script principal pour lancer le scraping.
-- `scraping.py` : les fonctions pour effectuer le scraping des données.
 - `categories/` : répertoire contenant les fichiers CSV pour chaque catégorie de livres.
 
 ## Auteur
 
 [lorycarvajol](https://github.com/votre-utilisateur)
-
-## Licence
-
-Ce projet est sous licence MIT. Consultez le fichier `LICENSE` pour plus de détails.
