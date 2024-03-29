@@ -3,6 +3,10 @@ from bs4 import BeautifulSoup
 import csv
 import os
 
+
+# TODO : scrapping books et gitignore
+
+
 # URL de la page principale
 url = "http://books.toscrape.com/index.html"
 page = requests.get(url)
@@ -78,10 +82,13 @@ def get_book_info(url):
 # Recherche des URLs des catégories
 categories = soup.find("ul", class_="nav nav-list").find_all("li")
 categories_urls = []
+
+
 for category in categories:
     categories_urls.append("http://books.toscrape.com/" + category.find("a")["href"])
 
-# Parcours de chaque catégorie
+
+# # Parcours de chaque catégorie
 for category_url in categories_urls:
     # Récupérer le contenu de la page de catégorie
     page = requests.get(category_url)
@@ -122,19 +129,28 @@ for category_url in categories_urls:
             book_info = get_book_info(book_url)
             writer.writerow(book_info)
 
+    def get_book_images_urls():
+        book_images_urls = []
+        page_number = 1
+        while True:
+            try:
+                page_url = (
+                    f"http://books.toscrape.com/catalogue/page-{page_number}.html"
+                )
+                page = requests.get(page_url)
+                # Si la page n'existe pas, une erreur sera levée ici
+                page.raise_for_status()
 
-def get_book_images_urls():
-    book_images_urls = []
-    for page_number in range(1, 51):
-        page_url = (
-            "http://books.toscrape.com/catalogue/page-" + str(page_number) + ".html"
-        )
-        page = requests.get(page_url)
-        soup = BeautifulSoup(page.content, "html.parser")
-        book_images = soup.find_all("img")
-        for book_image in book_images:
-            book_images_urls.append(book_image["src"])
-    return book_images_urls
+                soup = BeautifulSoup(page.content, "html.parser")
+                book_images = soup.find_all("img")
+                for book_image in book_images:
+                    book_images_urls.append(book_image["src"])
+
+                page_number += 1
+            except requests.exceptions.HTTPError:
+                # Arrête la boucle si une page ne peut pas être chargée (par exemple, erreur 404)
+                break
+        return book_images_urls
 
 
 def download_book_images():
