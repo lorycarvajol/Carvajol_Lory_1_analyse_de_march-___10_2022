@@ -1,0 +1,27 @@
+# Exclure les dossiers categories et images
+categories/
+images/
+
+# Fichiers Python bytecode
+__pycache__/
+*.py[cod]
+
+# Fichiers de package
+*.egg-info/
+dist/
+build/
+
+# Environnements virtuels
+venv/
+*.venv
+env/
+*.env
+
+# Fichiers de configuration de l'IDE
+.idea/
+.vscode/
+*.swp
+
+# Fichiers de cache ou logs
+*.log
+.cache/
