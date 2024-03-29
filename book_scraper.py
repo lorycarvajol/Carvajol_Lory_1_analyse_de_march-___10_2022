@@ -4,9 +4,6 @@ import csv
 import os
 
 
-# TODO : scrapping books et gitignore
-
-
 # URL de la page principale
 url = "http://books.toscrape.com/index.html"
 page = requests.get(url)

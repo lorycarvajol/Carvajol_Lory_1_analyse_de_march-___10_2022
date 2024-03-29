@@ -1,32 +1,58 @@
-# Projet de Scraping de Livres
-
-Ce projet vise à extraire des informations sur les livres à partir du site "http://books.toscrape.com" en utilisant Python et BeautifulSoup pour le scraping web.
+# Project Title: Book Scraper from Books to Scrape
 
 ## Description
 
-Le script principal (`main.py`) parcourt différentes catégories de livres sur le site web, extrait les détails de chaque livre (titre, prix, disponibilité, description, etc.) et les stocke dans des fichiers CSV séparés pour chaque catégorie.
+Ce projet est un scraper Python qui extrait les informations sur les livres à partir du site web fictif "Books to Scrape". Il récupère les détails tels que le titre du livre, le prix, la disponibilité en stock, la description du produit, la catégorie, le classement par étoiles, et l'URL de l'image de couverture. Les informations sont enregistrées dans des fichiers CSV organisés par catégories de livres, et les images de couverture sont téléchargées dans un dossier local.
+
+## Features
+
+- Extraction des URLs de tous les livres d'une catégorie donnée.
+- Récupération et enregistrement des détails des livres dans des fichiers CSV.
+- Téléchargement des images de couverture des livres.
+- Gestion de la pagination pour les catégories contenant plusieurs pages de livres.
+- Structure organisée des données récupérées, avec un dossier par catégorie.
+- `.gitignore` configuré pour exclure les dossiers `categories/`, `images/`, et d'autres fichiers non nécessaires.
+
+## Prerequisites
+
+- Python 3.x
+- Bibliothèques Python : `requests`, `BeautifulSoup4`, `csv`, `os`
 
 ## Installation
 
-1. Clonez ce dépôt vers votre machine locale :
-2. Assurez-vous d'avoir Python 3 installé sur votre machine.
-3. Installez les dépendances en exécutant la commande suivante dans votre terminal :
+Clonez le dépôt GitHub :
 
-pip install -r requirements.txt
+git clone [https://github.com/lorycarvajol/Carvajol_Lory_1_analyse_de_march-___10_2022](https://github.com/lorycarvajol/Carvajol_Lory_1_analyse_de_march-___10_2022)
 
-## Utilisation
+Installez les dépendances nécessaires :
 
-1. Exécutez le script `main.py` pour lancer le scraping :
+pip install requests beautifulsoup4
 
-python main.py
 
-2. Les données seront extraites et stockées dans des fichiers CSV dans le répertoire `categories`.
+## Usage
+
+Pour exécuter le script de scraping, naviguez dans le dossier du projet cloné et lancez :
+
+```
+book_scraper.py
+```
+
 
 ## Structure du Projet
 
-- `main.py` : le script principal pour lancer le scraping.
-- `categories/` : répertoire contenant les fichiers CSV pour chaque catégorie de livres.
+- `book_scraper.py` : Script principal pour le scraping des livres.
+- `categories/` : Dossier contenant les fichiers CSV organisés par catégories de livres (exclu par `.gitignore`).
+- `images/` : Dossier contenant les images téléchargées des couvertures des livres (exclu par `.gitignore`).
+- `.gitignore` : Fichier configuré pour exclure les dossiers `categories/`, `images/`, et d'autres fichiers non nécessaires.
+- `README.md` : Ce fichier, expliquant le projet, son installation, et son utilisation.
 
-## Auteur
+## Contributing
 
-[lorycarvajol](https://github.com/votre-utilisateur)
+Si vous souhaitez contribuer à ce projet, veuillez forker le dépôt et proposer des pull requests.
+
+
+## Contact
+
+  Lory Carvajol
+
+Lien du projet : https://github.com/lorycarvajol/Carvajol_Lory_1_analyse_de_march-___10_2022
